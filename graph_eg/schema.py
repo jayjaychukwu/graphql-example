@@ -23,22 +23,41 @@ class ContactMutation(graphene.Mutation):
 
     contact = graphene.Field(ContactType)  # define the class we are the fields from
 
-    @classmethod
-    def mutate(cls, root, info, name, phone_number, id):
-        # function that will save the data to the db
-        #######CREATE###########
-        contact = Contact(
-            name=name,
-            phone_number=phone_number,
-        )  # accepts all fields
-        contact.save()  # save the contact to the database
+    ######INITIAL CODE########
+    # @classmethod
+    # def mutate(cls, root, info, name, phone_number, id):
+    #     # function that will save the data to the db
+    #     #######CREATE###########
+    #     contact = Contact(
+    #         name=name,
+    #         phone_number=phone_number,
+    #     )  # accepts all fields
+    #     contact.save()  # save the contact to the database
 
-        ##########UPDATE########################
-        get_contact = Contact.objects.get(id=id)
-        get_contact.name = name  # assign a new name
-        get_contact.phone_number = phone_number  # assign a new phone_number
-        get_contact.save()
-        return ContactMutation(contact=get_contact)
+    #     ##########UPDATE########################
+    #     get_contact = Contact.objects.get(id=id)
+    #     get_contact.name = name  # assign a new name
+    #     get_contact.phone_number = phone_number  # assign a new phone_number
+    #     get_contact.save()
+    #     return ContactMutation(contact=get_contact)
+
+    #######UPDATED CODE##############
+    def mutate(self, info, name, phone_number, id=None):
+        # this is for update case
+        if id:
+            contact = Contact.objects.get(id=id)
+            if name:
+                contact.name = name
+            if phone_number:
+                contact.phone_number = phone_number
+            contact.save()
+
+        # this is for create case
+        else:
+            contact = Contact(name=name, phone_number=phone_number)
+            contact.save()
+
+        return ContactMutation(contact=contact)
 
 
 class Query(graphene.ObjectType):
