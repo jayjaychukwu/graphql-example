@@ -1,6 +1,6 @@
 # graphql-example
 I had to use an older Django version, 3.2.9, because the third party packages
-> django-graphql-auth
+> django-graphql-auth,
 > django-graphql-jwt
 
 work really well with the older Django version.
