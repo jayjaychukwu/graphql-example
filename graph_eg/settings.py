@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
+# import django
+# from django.utils.encoding import force_str
+
+# django.utils.encoding.force_text = force_str
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,8 +44,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third party apps
     "graphene_django",
+    "graphql_auth",
+    "graphql_jwt.refresh_token.apps.RefreshTokenConfig",
+    "django_filters",
     # Local apps
     "main_app",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -126,5 +135,32 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# GRAPHQL setting
-GRAPHENE = {"SCHEMA": "graph_eg.schema.schema"}
+# CUSTOM USER SETTINGS
+AUTH_USER_MODEL = "users.User"
+
+# GRAPHQL settings
+GRAPHENE = {
+    "SCHEMA": "graph_eg.schema.schema",
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ],
+}
+
+AUTHENTICATION_BACKENDS = [
+    "graphql_auth.backends.GraphQLAuthBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+GRAPHQL_JWT = {
+    "JWT_ALLOW_ANY_CLASSES": [
+        # connect GraphQL Auth to GraphQL JWT for authentication
+        "graphql_auth.mutations.Register",
+        "graphql_auth.mutations.VerifyAccount",
+        "graphql_auth.mutations.ObtainJSONWebToken",  # get jwt to log in
+    ],
+    "JWT_VERIFY_EXPIRATION": True,  # affirm that the jwt token will expire
+    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
+}
+
+# Email settings
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
