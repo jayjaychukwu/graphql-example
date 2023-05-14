@@ -7,13 +7,16 @@ from main_app.models import Contact
 
 
 class ContactType(DjangoObjectType):
-    # Describe the data that is to be formatted into GraphQL fields
+    """Describe the data that is to be formatted into GraphQL fields"""
+
     class Meta:
         model = Contact
         field = ("id", "name", "phone_number")
 
 
 class ContactMutation(graphene.Mutation):
+    """For Creation and Updating of Contact objects"""
+
     class Arguments:
         # add fields you would like to create.
         # this will corelate with the ContactType fields above
@@ -60,6 +63,21 @@ class ContactMutation(graphene.Mutation):
         return ContactMutation(contact=contact)
 
 
+class ContactDelete(graphene.Mutation):
+    """For Deletion of Contact Objects"""
+
+    class Arguments:
+        id = graphene.ID()
+
+    contact = graphene.Field(ContactType)
+
+    @classmethod
+    def mutate(cls, root, info, id):
+        contact = Contact(id=id)
+        # delete the contact
+        contact.delete()
+
+
 class Query(graphene.ObjectType):
     # query ContactType class to get the list of contacts
     list_contact = graphene.List(ContactType)  # list all the Contact objects
@@ -81,6 +99,7 @@ class Mutation(graphene.ObjectType):
     # keywords that will be used to do the mutation in the frontend
     create_contact = ContactMutation.Field()
     update_contact = ContactMutation.Field()
+    delete_contact = ContactDelete.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
